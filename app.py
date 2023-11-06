@@ -2,8 +2,11 @@ from flask import Flask, request
 import os
 import openai
 from twilio_service import send_sms
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
@@ -28,14 +31,15 @@ def show_post(post_id):
   return str(post_id)
 
 @app.route("/upload-audio", methods=['POST'])
+@cross_origin()
 def handle_upload():
-    if request.method == "POST":
-        audio_file = request.files["audio_message"]
-        audio_file.save("./message.m4a")
-        audio = open("./message.m4a", "rb")
-        transcript = openai.Audio.transcribe("whisper-1", audio)
-        print(transcript)
+    print("incoming request")
+    audio_file = request.files["audio_message"]
+    audio_file.save("./message.m4a")
+    audio = open("./message.m4a", "rb")
+    transcript = openai.Audio.transcribe("whisper-1", audio)
+    print(transcript)
 
-        send_sms("+919153459675", transcript.text)
+    send_sms("+919153459675", transcript.text)
 
-        return transcript
+    return transcript
