@@ -1,6 +1,11 @@
-from flask import Flask
+from flask import Flask, request
+import os
+import openai
+from twilio_service import send_sms
 
 app = Flask(__name__)
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 @app.route("/")
 def index():
@@ -26,6 +31,11 @@ def show_post(post_id):
 def handle_upload():
     if request.method == "POST":
         audio_file = request.files["audio_message"]
-        audio_file.save("/var/www/uploads/message.mp4")
+        audio_file.save("./message.m4a")
+        audio = open("./message.m4a", "rb")
+        transcript = openai.Audio.transcribe("whisper-1", audio)
+        print(transcript)
 
-        return {"success" : true}
+        send_sms("+919153459675", transcript.text)
+
+        return transcript
