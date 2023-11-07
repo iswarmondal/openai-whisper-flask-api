@@ -1,8 +1,10 @@
+import json
 from flask import Flask, request
 import os
 import openai
 from twilio_service import send_sms
 from flask_cors import CORS, cross_origin
+from openai_service import transcribe, translate
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -43,3 +45,16 @@ def handle_upload():
     send_sms("+919153459675", transcript.text)
 
     return transcript
+
+@app.route("/translate-audio", methods=['POST'])
+@cross_origin()
+def handle_translation():
+    audio_file = request.files["audio_message"]
+    audio_file.save("./message.m4a")
+    abs_path = os.path.abspath("./message.m4a")
+    res=translate(audio_path=abs_path)
+    res_json=json.loads(res)
+
+    send_sms("+919153459675", res_json["text"])
+
+    return {"success": "true", "message":"Message sent"}
