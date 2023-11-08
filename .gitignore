@@ -161,3 +161,6 @@ cython_debug/
 
 # file upload
 message.m4a
+
+# Others
+contact_numbers.py

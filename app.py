@@ -2,15 +2,15 @@ import json
 from flask import Flask, request
 import os
 import openai
-from twilio_service import send_sms
+from twilio_service import send_sms, send_bulk_sms
 from flask_cors import CORS, cross_origin
-from openai_service import transcribe, translate
+from openai_service import translate
+from contact_numbers import list_of_numbers
 
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 @app.route("/")
 def index():
@@ -19,32 +19,6 @@ def index():
 @app.route("/greet")
 def hello():
     return "Hello from the other side"
-
-@app.route('/user/<username>', methods=['GET', 'POST'])
-def show_user(username):
-    if request.method == 'GET':
-        return 'Username: %s' % username
-
-    if request.method == 'POST':
-        return {"username": username}
-
-@app.route('/post/<int:post_id>')
-def show_post(post_id):
-  return str(post_id)
-
-@app.route("/upload-audio", methods=['POST'])
-@cross_origin()
-def handle_upload():
-    print("incoming request")
-    audio_file = request.files["audio_message"]
-    audio_file.save("./message.m4a")
-    audio = open("./message.m4a", "rb")
-    transcript = openai.Audio.transcribe("whisper-1", audio)
-    print(transcript)
-
-    send_sms("+919153459675", transcript.text)
-
-    return transcript
 
 @app.route("/translate-audio", methods=['POST'])
 @cross_origin()
@@ -58,3 +32,11 @@ def handle_translation():
     send_sms("+919153459675", res_json["text"])
 
     return {"success": "true", "message":"Message sent"}
+
+@app.route("/send-bulk-sms", methods=['POST'])
+@cross_origin()
+def handle_sending_bulk_sms():
+    data = request.get_json()
+    message=data["message"]
+    send_bulk_sms(numbers_list=list_of_numbers, body=message)
+    return {"success": "true", "message": message}

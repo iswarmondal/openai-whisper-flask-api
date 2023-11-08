@@ -20,3 +20,21 @@ def send_sms (number: str, message: str):
     except Exception as e:
         print(e)
 
+
+def send_bulk_sms(numbers_list: list[str], body: str):
+    try:
+        print("=== Starting bulk messaging ===")
+        for number in numbers_list:
+            print("Sending to " + number)
+            message = client.messages.create(
+                to=number,
+                from_=TWILIO_PHONE_NUMBER,
+                body=body
+            )
+            print(message)
+
+        print("=== Ending bulk messaging ===")
+        
+    except Exception as err:
+        print(err)
+        return
