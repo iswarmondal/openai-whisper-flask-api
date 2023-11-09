@@ -1,10 +1,9 @@
 import json
 from flask import Flask, request
 import os
-import openai
-from twilio_service import send_sms, send_bulk_sms
+from services.twilio_service import send_sms, send_bulk_sms
 from flask_cors import CORS, cross_origin
-from openai_service import translate
+from services.openai_service import translate
 from contact_numbers import list_of_numbers
 
 app = Flask(__name__)
